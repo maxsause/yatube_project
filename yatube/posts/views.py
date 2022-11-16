@@ -55,7 +55,7 @@ def post_create(request):
     form = PostForm(request.POST or None)
     context = {
         'form': form,
-        "is_edit": False
+        'is_edit': False
     }
     if form.is_valid():
         form = form.save(commit=False)
@@ -65,18 +65,19 @@ def post_create(request):
     return render(request, template, context)
 
 
+@login_required
 def post_edit(request, post_id):
     template = 'posts/create_post.html'
     post = get_object_or_404(Post, pk=post_id)
-    if post.author == request.user:
-        form = PostForm(request.POST or None, instance=post)
-        if form.is_valid():
-            post = form.save()
-            return redirect('posts:post_detail', post.pk)
-        context = {
-            'post_id': post_id,
-            'form': form,
-            "is_edit": True
-        }
-        return render(request, template, context)
-    return redirect('posts:post_detail', post.pk)
+    if post.author != request.user:
+        return redirect('posts:post_detail', post.pk)
+    form = PostForm(request.POST or None, instance=post)
+    if form.is_valid():
+        post = form.save()
+        return redirect('posts:post_detail', post.pk)
+    context = {
+        'post_id': post_id,
+        'form': form,
+        'is_edit': True
+    }
+    return render(request, template, context)
