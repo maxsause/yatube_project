@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load thumbnail %}
 {% block title %} {{ post.text|truncatechars:30 }} {% endblock %}
 {% block content %}
   <div class="row">
@@ -20,12 +21,15 @@
         </li>
         <li class="list-group-item">
           <a href="{% url 'posts:profile' post.author.username %}">
-            все посты пользователя
+            Все посты пользователя
           </a>
         </li>
       </ul>
     </aside>
     <article class="col-12 col-md-9">
+      {% thumbnail post.image "960x200" crop="center" upscale=True as im %}
+        <img class="card-img my-2" src="{{ im.url }}">
+      {% endthumbnail %}
       <p>
         {{ post.text|linebreaks }}
       </p>
@@ -34,6 +38,7 @@
            Редактировать пост
         </a>
       {% endif %}
+      {% include 'includes/comment.html' %}
     </article>
   </div>
 {% endblock %}

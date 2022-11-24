@@ -1,15 +1,12 @@
 {% extends 'base.html' %}
 {% load thumbnail %}
-{% block title %}Группа {{ group.title }}{% endblock %}
+{% block title %}Ваши подписки{% endblock %}
+{% load cache %}
 {% block content %}
-  <main>
-    <div class="container py-3">
-      <h1>{{ group.title }}</h1>
-      <p>
-        {{ group.description }}
-      </p>
-      {% for post in page_obj %}
-        <div class="row">
+  {% include 'includes/switcher.html' %}
+  {% cache 20 follow_page %}
+    {% for post in page_obj %}
+      <div class="row">
           <aside class="col-12 col-md-9">
             {% include 'includes/post.html' %}
             {% if post.group %}
@@ -23,9 +20,8 @@
             {% endthumbnail %}
           </article>
           {% if not forloop.last %}<hr>{% endif %}
-        </div>
-      {% endfor %}
-      {% include 'includes/paginator.html' %}
-    </div>
-  </main>
+      </div>
+    {% endfor %}
+    {% include 'includes/paginator.html' %}
+  {% endcache %}
 {% endblock %}

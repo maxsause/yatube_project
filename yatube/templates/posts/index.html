@@ -1,17 +1,27 @@
 {% extends 'base.html' %}
+{% load thumbnail %}
 {% block title %}YaTube{% endblock %}
+{% load cache %}
 {% block content %}
-  <main>
-    <div class="container py-3">
-      {% for post in page_obj %}
-        {% include 'includes/post.html' %}
-        {% if post.group %}
-          Группа: <a href="{% url 'posts:group_list' post.group.slug %}">{{ post.group.slug }}</a>
-        {% endif %}
-        <p> <a href="{% url 'posts:post_detail' post.pk %}">Подробная информация </a> </p>
+  {% include 'includes/switcher.html' %}
+  {% cache 20 index_page %}
+    {% for post in page_obj %}
+      <div class="row">
+        <aside class="col-12 col-md-9">
+          {% include 'includes/post.html' %}
+          {% if post.group %}
+            Группа: <a href="{% url 'posts:group_list' post.group.slug %}">{{ post.group.slug }}</a>
+          {% endif %}
+          <p> <a href="{% url 'posts:post_detail' post.pk %}">Подробная информация </a> </p>
+        </aside>
+        <article class="col-12 col-md-3">
+          {% thumbnail post.image "900x450" crop="center" upscale=True as im %}
+            <img class="card-img my-2" src="{{ im.url }}">
+          {% endthumbnail %}
+        </article>
         {% if not forloop.last %}<hr>{% endif %}
-      {% endfor %}
-      {% include 'includes/paginator.html' %}
-    </div>
-  </main>
+      </div>
+    {% endfor %}
+    {% include 'includes/paginator.html' %}
+  {% endcache %}
 {% endblock %}
