@@ -8,7 +8,7 @@ from .utils import pagination
 
 def index(request):
     template = 'posts/index.html'
-    posts = Post.objects.all()
+    posts = Post.objects.select_related('author', 'group').all()
     context = {
         'page_obj': pagination(request, posts),
     }
@@ -29,14 +29,11 @@ def group_posts(request, slug=None):
 def profile(request, username):
     template = 'posts/profile.html'
     author = get_object_or_404(User, username=username)
-    if request.user.is_authenticated:
-        if Follow.objects.filter(
-                user=request.user,
-                author=author
-        ):
-            following = True
-        else:
-            following = False
+    if (
+        request.user.is_authenticated
+        and Follow.objects.filter(user=request.user, author=author)
+    ):
+        following = True
     else:
         following = False
     posts = author.posts.all()
@@ -54,10 +51,11 @@ def post_detail(request, post_id):
     author = get_object_or_404(User, username=post.author)
     counter = author.posts.all().count()
     comments = post.comments.all()
+    form = CommentForm(request.POST or None)
     context = {
         'post': post,
         'counter': counter,
-        'form': CommentForm,
+        'form': form,
         'comments': comments,
     }
     return render(request, template, context)
@@ -140,7 +138,7 @@ def profile_follow(request, username):
         and author != request.user
     ):
         Follow.objects.create(user=request.user, author=author)
-        return redirect("posts:profile", username=username)
+    return redirect("posts:profile", username=username)
 
 
 @login_required
